@@ -1,0 +1,49 @@
+generator client {
+    provider = "prisma-client-js"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model Usuario {
+    id       String    @id @default(uuid()) @db.Uuid
+    nome     String    @db.VarChar(60)
+    idade    Int?
+    email    String    @unique @db.VarChar(50)
+    password String    @db.Text
+    Compras  Compras[]
+
+    @@map("usuario")
+}
+
+model Produto {
+    id                  String @id @default(uuid()) @db.Uuid
+    descricao           String @db.VarChar(60)
+    valor               Int
+    quantidadeEmEstoque Int    @map("quantidade-em-estoque")
+    tipoDeProduto       Int
+    password            String @db.Text
+
+    criadoEm DateTime  @default(now()) @map("criado_em")
+    Compras  Compras[]
+
+    @@map("produto")
+}
+
+model Compras {
+    id           String   @id @default(uuid()) @db.Uuid
+    dataCompra   DateTime @map("data_compra") @db.Date
+    quantidade   Int      @db.Integer
+    criadoEm     DateTime @default(now()) @map("criado_em") @db.Timestamp()
+    atualizadoEm DateTime @updatedAt @map("atualizado_em") @db.Timestamp()
+
+    usuarioId String  @map("usuario_id") @db.Uuid
+    usuario   Usuario @relation(fields: [usuarioId], references: [id])
+
+    produtoId String  @map("produto_id") @db.Uuid
+    produto   Produto @relation(fields: [produtoId], references: [id])
+
+    @@map("compras")
+}
